@@ -1,0 +1,4 @@
+pypdf==6.16.1
+python-dotenv>=1.0,<2.0
+tokenizers==0.23.1
+voyageai==0.5.0
