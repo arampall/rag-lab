@@ -13,10 +13,12 @@ Tesla PDF
   -> page-by-page extraction with pypdf
   -> conservative whitespace cleaning
   -> 600-token chunks with 100-token overlap
-  -> Voyage document embeddings (small inspection experiment)
+  -> Voyage document embeddings
+  -> local Qdrant vector index
 ```
 
-Qdrant indexing, retrieval, and answer generation have not been added yet.
+Single-query retrieval inspection is implemented. Full retrieval evaluation and
+answer generation have not been added yet.
 
 ## Project structure
 
@@ -32,6 +34,7 @@ Qdrant indexing, retrieval, and answer generation have not been added yet.
 │   ├── eval_dataset.json
 │   ├── index_preflight.py
 │   ├── index_qdrant.py
+│   ├── retrieve.py
 │   └── main.py
 ├── .env.example
 ├── .gitignore
@@ -156,6 +159,24 @@ the collection only when absent, rejects incompatible existing configuration,
 upserts deterministic points in batches, and verifies the final point count and
 a sample payload. The local Qdrant data is ignored by Git.
 
+## Inspect one retrieval query
+
+Preview the default evaluation query without making an API call:
+
+```bash
+python src/retrieve.py
+```
+
+Embed that one question as a Voyage query and inspect Qdrant's top five chunks:
+
+```bash
+python src/retrieve.py --execute
+```
+
+Use `--example-id` to select another stable ID from `eval_dataset.json`. Output
+includes rank, similarity score, page, chunk ID, expected-phrase matches, and a
+short text preview so retrieval failures remain inspectable.
+
 ## Learning principle
 
 Retrieval and generation are evaluated separately:
@@ -163,5 +184,5 @@ Retrieval and generation are evaluated separately:
 - If the relevant chunk is not retrieved, debug retrieval.
 - If the relevant chunk is retrieved but the answer is poor, debug generation.
 
-The next stages will add a small evaluation dataset, Qdrant indexing, retrieval
-inspection, and finally grounded answer generation.
+The next stages will evaluate retrieval across all eight questions and then add
+grounded answer generation only after retrieval failures are understood.
