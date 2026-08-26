@@ -3,5 +3,6 @@
 .DS_Store
 AGENTS.md
 PROGRESS.md
+data/qdrant/
 __pycache__/
 *.py[cod]

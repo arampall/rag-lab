@@ -30,6 +30,8 @@ Qdrant indexing, retrieval, and answer generation have not been added yet.
 │   ├── embed.py
 │   ├── evaluate.py
 │   ├── eval_dataset.json
+│   ├── index_preflight.py
+│   ├── index_qdrant.py
 │   └── main.py
 ├── .env.example
 ├── .gitignore
@@ -136,6 +138,23 @@ python src/index_preflight.py
 The preflight reports how many cleaned chunk texts and tokens would be sent to
 Voyage, checks chunk IDs and metadata, and displays the planned Qdrant vector
 and payload configuration. It does not create embeddings or a collection.
+
+Preview the guarded indexing command:
+
+```bash
+python src/index_qdrant.py
+```
+
+After inspecting its scope, explicitly execute document embedding and indexing:
+
+```bash
+python src/index_qdrant.py --execute
+```
+
+Execution stores the `tesla_chunks` collection under `data/qdrant/`. It creates
+the collection only when absent, rejects incompatible existing configuration,
+upserts deterministic points in batches, and verifies the final point count and
+a sample payload. The local Qdrant data is ignored by Git.
 
 ## Learning principle
 
