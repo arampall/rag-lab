@@ -28,6 +28,8 @@ Qdrant indexing, retrieval, and answer generation have not been added yet.
 │   ├── extract.py
 │   ├── chunk.py
 │   ├── embed.py
+│   ├── evaluate.py
+│   ├── eval_dataset.json
 │   └── main.py
 ├── .env.example
 ├── .gitignore
@@ -105,6 +107,23 @@ implemented and validated.
 
 Document chunks must be embedded with `input_type="document"`. User questions
 will later be embedded with `input_type="query"`.
+
+## Validate the retrieval evaluation dataset
+
+Run the offline dataset and source-grounding checks:
+
+```bash
+python src/evaluate.py
+```
+
+The checker validates the record schema, stable unique IDs, page references,
+and expected source phrases. It reads the local PDF but does not create
+embeddings or make API calls.
+
+The initial retrieval metric is page `Hit@5`: a question passes when at least
+one of its five highest-ranked chunks comes from one of its expected pages.
+Retrieved chunk text and similarity scores will also be printed for diagnosing
+why individual questions miss.
 
 ## Learning principle
 

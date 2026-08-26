@@ -1,0 +1,92 @@
+[
+    {
+        "id": "model3_paid_reservations",
+        "question": "How many paid reservations did Model 3 receive within a week?",
+        "expected_answer": "Over 325,000 paid reservations.",
+        "expected_pages": [3, 5],
+        "expected_phrases": [
+            "over 325,000 paid reservations"
+        ],
+        "category": "factual",
+        "notes": "The fact appears in more than one location."
+    },
+    {
+        "id": "employees_count_2025",
+        "question": "How many employees did Tesla report having in 2025?",
+        "expected_answer": "Tesla reported 134,785 employees in 2025.",
+        "expected_pages": [2, 28],
+        "expected_phrases": [
+            "134,785"
+        ],
+        "category": "factual",
+        "notes": "The value appears in the infobox and financial table."
+    },
+    {
+        "id": "robotaxi_autonomous",
+        "question": "Are robotaxis fully autonomous?",
+        "expected_answer": "No. Robotaxis currently rely on human supervisors, with the intent of eventually allowing fully autonomous rides.",
+        "expected_pages": [8],
+        "expected_phrases": [
+            "Robotaxis currently rely on human supervisors, with the intent of eventually allowing for fully autonomous rides"
+        ],
+        "category": "services",
+        "notes": "The fact appears in one location."
+    },
+    {
+        "id": "tesla_partnership_batterycell",
+        "question": "Which battery cell maker did Tesla announce it would jointly develop electric-vehicle battery cells with in 2010?",
+        "expected_answer": "Panasonic",
+        "expected_pages": [15],
+        "expected_phrases": [
+            "Tesla and battery cell maker Panasonic announced that they would together develop"
+        ],
+        "category": "partnership",
+        "notes": "The fact appears in one location."
+    },
+    {
+        "id": "initial_product_strategy",
+        "question": "What was Tesla's initial product strategy?",
+        "expected_answer": "Tesla planned to begin with a premium, low-volume sports car for early adopters and then move toward more affordable, higher-volume vehicles.",
+        "expected_pages": [2, 9],
+        "expected_phrases": [
+            "The company's strategy was to start with a premium sports car",
+            "allow it to progressively bring down the cost of batteries"
+        ],
+        "category": "business_strategy",
+        "notes": "Two passages describe the same strategy using different wording."
+    },
+    {
+        "id": "direct_sales_model",
+        "question": "How does Tesla sell vehicles instead of using franchised dealerships?",
+        "expected_answer": "Tesla sells vehicles directly through its website and a network of company-owned stores.",
+        "expected_pages": [9],
+        "expected_phrases": [
+            "sells vehicles directly through its website and a network of company-owned stores"
+        ],
+        "category": "business_strategy",
+        "notes": "Direct-sales strategy described on the business strategy page."
+    },
+    {
+        "id": "vertical_integration",
+        "question": "What components does Tesla develop in-house as part of its vertical-integration strategy?",
+        "expected_answer": "Tesla develops components such as batteries, motors, and software in-house.",
+        "expected_pages": [9, 10],
+        "expected_phrases": [
+            "develops many components in-house, such as batteries, motors, and software"
+        ],
+        "category": "business_strategy",
+        "notes": "The fact appears on two adjacent pages."
+    },
+    {
+        "id": "technology_licensing",
+        "question": "Why does Tesla generally allow competitors to license its technology?",
+        "expected_answer": "Tesla says licensing helps competitors accelerate the world's use of sustainable energy.",
+        "expected_pages": [10],
+        "expected_phrases": [
+            "help its competitors accelerate the world's use of sustainable energy"
+        ],
+        "category": "business_strategy",
+        "notes": "Licensing is presented as supporting Tesla's sustainability mission."
+    }
+]
+    
