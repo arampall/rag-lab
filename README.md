@@ -125,6 +125,18 @@ one of its five highest-ranked chunks comes from one of its expected pages.
 Retrieved chunk text and similarity scores will also be printed for diagnosing
 why individual questions miss.
 
+## Preview Qdrant indexing
+
+Inspect the complete indexing scope without making API calls:
+
+```bash
+python src/index_preflight.py
+```
+
+The preflight reports how many cleaned chunk texts and tokens would be sent to
+Voyage, checks chunk IDs and metadata, and displays the planned Qdrant vector
+and payload configuration. It does not create embeddings or a collection.
+
 ## Learning principle
 
 Retrieval and generation are evaluated separately:

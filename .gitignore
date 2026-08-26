@@ -1,5 +1,7 @@
 .env
 **/.env
 .DS_Store
+AGENTS.md
+PROGRESS.md
 __pycache__/
 *.py[cod]
