@@ -31,6 +31,7 @@ answer generation have not been added yet.
 │   ├── chunk.py
 │   ├── embed.py
 │   ├── evaluate.py
+│   ├── evaluate_retrieval.py
 │   ├── eval_dataset.json
 │   ├── index_preflight.py
 │   ├── index_qdrant.py
@@ -176,6 +177,35 @@ python src/retrieve.py --execute
 Use `--example-id` to select another stable ID from `eval_dataset.json`. Output
 includes rank, similarity score, page, chunk ID, expected-phrase matches, and a
 short text preview so retrieval failures remain inspectable.
+
+## Evaluate all retrieval questions
+
+Preview the eight-query evaluation scope without making an API call:
+
+```bash
+python src/evaluate_retrieval.py
+```
+
+Embed all eight questions in one Voyage query batch and calculate page `Hit@5`
+plus phrase hit rate:
+
+```bash
+python src/evaluate_retrieval.py --execute
+```
+
+Every ranked result retains its score, page, chunk ID, and text preview. This
+keeps aggregate metrics from hiding which questions or chunks failed.
+
+The first eight-question baseline produced:
+
+```text
+Page Hit@5:    87.5% (7/8)
+Phrase hits:   87.5% (7/8)
+```
+
+The Panasonic partnership question missed; related battery passages displaced
+the expected page 15 passage from the top five. Diagnose that baseline failure
+before introducing more advanced retrieval techniques.
 
 ## Learning principle
 

@@ -11,18 +11,29 @@ class Embedding:
 
 def embed_query(query: str, model: str) -> list[float]:
     """Embed one retrieval query and return its single vector."""
-    if not query.strip():
-        raise ValueError("Query must not be empty")
+    return embed_queries([query], model).vectors[0]
+
+
+def embed_queries(queries: list[str], model: str) -> Embedding:
+    """Embed retrieval queries as one validated batch."""
+    if not queries:
+        raise ValueError("At least one query is required")
+    if any(not query.strip() for query in queries):
+        raise ValueError("Queries must not be empty")
 
     client = voyageai.Client()
-    result = client.embed([query], model=model, input_type="query")
+    result = client.embed(queries, model=model, input_type="query")
 
-    if len(result.embeddings) != 1:
+    if len(result.embeddings) != len(queries):
         raise RuntimeError(
-            f"Expected one query vector, received {len(result.embeddings)}"
+            f"Expected {len(queries)} query vectors, "
+            f"received {len(result.embeddings)}"
         )
 
-    return result.embeddings[0]
+    return Embedding(
+        vectors=result.embeddings,
+        total_tokens=result.total_tokens,
+    )
 
 def embed_chunks(chunks: list[Chunk], model: str) -> Embedding:
     if not chunks:
