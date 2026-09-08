@@ -213,6 +213,40 @@ Use `--example-id` to select another golden question. Generation uses the
 frozen top-five vector baseline, sends only those five complete chunks to Claude
 Sonnet 5, requires page citations, and must abstain when context is insufficient.
 
+## Evaluate grounded generation
+
+Preview the complete eight-question generation scope without making API calls:
+
+```bash
+python src/evaluate_generation.py
+```
+
+Run retrieval and generation for every evaluation example:
+
+```bash
+python src/evaluate_generation.py --execute
+```
+
+The evaluator keeps retrieval evidence and generation behavior separate. It
+checks whether answer-bearing context was retrieved, whether insufficient
+context caused an exact abstention, and whether answer citations refer only to
+retrieved pages. It prints expected and generated answers together because
+semantic correctness still requires human review.
+
+The first full generation baseline produced:
+
+```text
+Grounding behavior: 100.0% (8/8)
+Correct answers:     7/7 answerable questions
+Correct abstentions: 1/1 retrieval miss
+Claude usage:        31,602 input / 949 output tokens
+```
+
+All answered cases were manually verified against their cited PDF pages. The
+initial-product-strategy and direct-sales responses were unnecessarily long at
+316 and 320 output tokens, respectively; technology licensing was also longer
+than needed at 134 tokens.
+
 ## Learning principle
 
 Retrieval and generation are evaluated separately:
@@ -220,5 +254,18 @@ Retrieval and generation are evaluated separately:
 - If the relevant chunk is not retrieved, debug retrieval.
 - If the relevant chunk is retrieved but the answer is poor, debug generation.
 
-The next stage will evaluate grounded generation across all eight questions,
-keeping retrieval and generation failures separate.
+The baseline now measures retrieval and generation separately. A 250-token
+generation cap exposed excessive verbosity, so the next experiment will tighten
+the answer-length instruction and rerun only the three verbose cases.
+
+## Current handoff
+
+The extraction, chunking, Voyage indexing, local Qdrant retrieval, retrieval
+evaluation, and guarded generation-evaluation flows are implemented. The local
+`tesla_chunks` collection already contains 225 points; do not re-index it for
+the next milestone.
+
+The frozen top-five generation baseline passed all eight grounding-behavior
+checks and all manual correctness checks. The next checkpoint is a focused
+concision experiment on `initial_product_strategy`, `direct_sales_model`, and
+`technology_licensing`; avoid rerunning the other five paid cases.

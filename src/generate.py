@@ -1,6 +1,8 @@
 import argparse
 import os
 
+from dataclasses import dataclass
+
 from anthropic import Anthropic
 from dotenv import load_dotenv
 
@@ -14,8 +16,16 @@ from evaluate import EvalExample, load_eval_dataset
 from retrieve import retrieve, select_example
 
 
+@dataclass(frozen=True)
+class GenerationResult:
+    answer: str
+    points: tuple[object, ...]
+    input_tokens: int
+    output_tokens: int
+
+
 GENERATION_TOP_K = DEFAULT_TOP_K
-MAX_OUTPUT_TOKENS = 250
+MAX_OUTPUT_TOKENS = 400
 FALLBACK_MESSAGE = "Insufficient context to answer."
 
 # create prompt for generation
@@ -175,25 +185,34 @@ def extract_answer(message: object) -> str:
     return answer
 
 
-def generate_answer(example: EvalExample) -> None:
-    points = retrieve_generation_context(example)
-    print_context_scope(points)
-
-    response = call_generation_model(example, points)
-
-    if response.stop_reason == "max_tokens":
-        raise RuntimeError("Claude reached the output-token limit")
-
-    answer = extract_answer(response)
+def print_generation_result(result: GenerationResult) -> None:
+    print_context_scope(list(result.points))
 
     print("\nAnswer")
-    print(answer)
+    print(result.answer)
 
     print(
         "\nClaude usage: "
-        f"{response.usage.input_tokens} input tokens, "
-        f"{response.usage.output_tokens} output tokens"
+        f"{result.input_tokens} input tokens, "
+        f"{result.output_tokens} output tokens"
     )
+
+
+
+def generate_result(example: EvalExample) -> GenerationResult:
+    points = retrieve_generation_context(example)
+    response = call_generation_model(example, points)
+
+    if response.stop_reason == "max_tokens":
+        raise RuntimeError("Claude reached the output token limit")
+
+    return GenerationResult(
+        answer=extract_answer(response),
+        points=tuple(points),
+        input_tokens=response.usage.input_tokens,
+        output_tokens=response.usage.output_tokens
+    )
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -238,7 +257,8 @@ def main() -> None:
 
     load_dotenv(PROJECT_ROOT / ".env")
     require_api_keys()
-    generate_answer(example)
+    result = generate_result(example)
+    print_generation_result(result)
 
 
 if __name__ == "__main__":
