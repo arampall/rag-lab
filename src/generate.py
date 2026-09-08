@@ -39,7 +39,9 @@ SYSTEM_PROMPT = f"""
     - Cite every factual claim using the PDF page format [p. N]
     - If the sources do not contain enough evidence, respond with exactly:
         {FALLBACK_MESSAGE}
-    - Keep the answer concise
+    - Answer in exactly one concise sentence
+    - Include only the information required to answer the question
+    - Do not add examples, history, caveats, or related facts unless the question asks for them
 """.strip()
 
 

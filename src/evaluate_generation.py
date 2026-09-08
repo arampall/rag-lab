@@ -179,6 +179,15 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
+        "--example-id",
+        action="append",
+        help=(
+        "Evaluate only this example ID. "
+        "Repeat the option to select multiple examples."
+        ),
+    )
+
+    parser.add_argument(
         "--execute",
         action="store_true",
         help="Run retrieval and generation for every evaluation example.",
@@ -190,8 +199,24 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
     examples = load_eval_dataset(DEFAULT_DATASET)
-    print_scope(examples)
 
+    if args.example_id:
+        requested_ids = set(args.example_id)
+        available_ids = {example.id for example in examples}
+        unknown_ids = requested_ids - available_ids
+
+        if unknown_ids:
+            raise ValueError(
+                f"Unknown example IDs: {sorted(unknown_ids)}"
+            )
+
+        examples = [
+            example
+            for example in examples
+            if example.id in requested_ids
+        ]
+
+    print_scope(examples)
     if not args.execute:
         print("Dry run only. Re-run with --execute after reviewing the scope.")
         return

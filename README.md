@@ -254,9 +254,11 @@ Retrieval and generation are evaluated separately:
 - If the relevant chunk is not retrieved, debug retrieval.
 - If the relevant chunk is retrieved but the answer is poor, debug generation.
 
-The baseline now measures retrieval and generation separately. A 250-token
-generation cap exposed excessive verbosity, so the next experiment will tighten
-the answer-length instruction and rerun only the three verbose cases.
+The baseline now measures retrieval and generation separately. Requiring no
+more than two sentences reduced the three verbose responses from 770 combined
+output tokens to 392 while preserving correctness, citations, and a 3/3
+grounding-behavior pass rate. The answers still included unnecessary second
+sentences, so the next experiment will test a one-sentence constraint.
 
 ## Current handoff
 
@@ -266,6 +268,8 @@ evaluation, and guarded generation-evaluation flows are implemented. The local
 the next milestone.
 
 The frozen top-five generation baseline passed all eight grounding-behavior
-checks and all manual correctness checks. The next checkpoint is a focused
-concision experiment on `initial_product_strategy`, `direct_sales_model`, and
-`technology_licensing`; avoid rerunning the other five paid cases.
+checks and all manual correctness checks. The first concision experiment cut
+combined output tokens by 49% but only partially solved the problem. The next
+checkpoint is a one-sentence prompt experiment on `initial_product_strategy`,
+`direct_sales_model`, and `technology_licensing`; avoid rerunning the other five
+paid cases.
