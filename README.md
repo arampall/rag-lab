@@ -254,11 +254,12 @@ Retrieval and generation are evaluated separately:
 - If the relevant chunk is not retrieved, debug retrieval.
 - If the relevant chunk is retrieved but the answer is poor, debug generation.
 
-The baseline now measures retrieval and generation separately. Requiring no
-more than two sentences reduced the three verbose responses from 770 combined
-output tokens to 392 while preserving correctness, citations, and a 3/3
-grounding-behavior pass rate. The answers still included unnecessary second
-sentences, so the next experiment will test a one-sentence constraint.
+The baseline now measures retrieval and generation separately. A two-sentence
+constraint reduced the three verbose responses from 770 combined output tokens
+to 392. The final one-sentence, central-fact, close-paraphrase prompt reduced
+them to 62, 33, and 44 tokens, or 139 combined, while preserving correctness and
+citations. Manual review during iteration caught an unsupported claim that
+citation-format checks had missed.
 
 ## Current handoff
 
@@ -267,9 +268,9 @@ evaluation, and guarded generation-evaluation flows are implemented. The local
 `tesla_chunks` collection already contains 225 points; do not re-index it for
 the next milestone.
 
-The frozen top-five generation baseline passed all eight grounding-behavior
-checks and all manual correctness checks. The first concision experiment cut
-combined output tokens by 49% but only partially solved the problem. The next
-checkpoint is a one-sentence prompt experiment on `initial_product_strategy`,
-`direct_sales_model`, and `technology_licensing`; avoid rerunning the other five
-paid cases.
+The frozen top-five generation baseline passed all eight automated
+grounding-behavior checks and all initial manual correctness checks. Prompt
+experiments reduced the three verbose answers by 82% in total and exposed that
+valid page citations do not prove claim-level entailment. The next checkpoint is
+to design the smallest retrieval experiment for the known Panasonic rank-six
+miss while preserving vector-only top five as the recorded baseline.

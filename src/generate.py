@@ -37,11 +37,13 @@ SYSTEM_PROMPT = f"""
     - Do not use prior knowledge
     - Do not infer facts that are not explicitly supported
     - Cite every factual claim using the PDF page format [p. N]
+    - Prefer a close paraphrase of the shortest source passage that directly answers the question
+    - When a direct answer is available, do not synthesize additional causes, mechanisms, or explanations
     - If the sources do not contain enough evidence, respond with exactly:
         {FALLBACK_MESSAGE}
-    - Answer in exactly one concise sentence
-    - Include only the information required to answer the question
-    - Do not add examples, history, caveats, or related facts unless the question asks for them
+    - Answer with only the central fact needed to resolve the question
+    - Use one sentence and at most 30 words, excluding citations
+    - Do not add examples, background, implementation details, or related facts
 """.strip()
 
 
