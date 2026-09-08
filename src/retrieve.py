@@ -67,21 +67,24 @@ def inspect_results(example: EvalExample, points: list[object]) -> None:
     print(f"\nPage Hit@{TOP_K}: {hit}")
 
 
-def retrieve_example(example: EvalExample) -> None:
-    load_dotenv(PROJECT_ROOT / ".env")
-    query_vector = embed_query(example.question, EMBEDDING_MODEL)
-
+def search_points(query_vector: list[float], top_k: int) -> list[object]:
+    """Search the local collection and return ranked points with payloads."""
     client = QdrantClient(path=QDRANT_PATH)
     try:
-        points = client.query_points(
+        return client.query_points(
             collection_name=COLLECTION_NAME,
             query=query_vector,
             with_payload=True,
-            limit=TOP_K,
+            limit=top_k,
         ).points
     finally:
         client.close()
 
+
+def retrieve_example(example: EvalExample) -> None:
+    load_dotenv(PROJECT_ROOT / ".env")
+    query_vector = embed_query(example.question, EMBEDDING_MODEL)
+    points = search_points(query_vector, TOP_K)
     inspect_results(example, points)
 
 

@@ -33,6 +33,7 @@ answer generation have not been added yet.
 │   ├── evaluate.py
 │   ├── evaluate_retrieval.py
 │   ├── eval_dataset.json
+│   ├── generate.py
 │   ├── index_preflight.py
 │   ├── index_qdrant.py
 │   ├── retrieve.py
@@ -206,6 +207,25 @@ Phrase hits:   87.5% (7/8)
 The Panasonic partnership question missed; related battery passages displaced
 the expected page 15 passage from the top five. Diagnose that baseline failure
 before introducing more advanced retrieval techniques.
+
+## Generate one grounded answer
+
+Add `ANTHROPIC_API_KEY` to the project-root `.env`, then preview the exact
+external-data scope without making API calls:
+
+```bash
+python src/generate.py
+```
+
+Run retrieval and grounded generation for one evaluation example:
+
+```bash
+python src/generate.py --execute
+```
+
+Use `--example-id` to select another golden question. Generation uses the
+frozen top-five vector baseline, sends only those five complete chunks to Claude
+Sonnet 5, requires page citations, and must abstain when context is insufficient.
 
 ## Learning principle
 
