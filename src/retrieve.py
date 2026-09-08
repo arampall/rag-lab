@@ -5,16 +5,21 @@ from __future__ import annotations
 import argparse
 
 from dotenv import load_dotenv
-from qdrant_client import QdrantClient
 
+from config import (
+    COLLECTION_NAME,
+    DEFAULT_DATASET,
+    DEFAULT_TOP_K,
+    EMBEDDING_MODEL,
+    PROJECT_ROOT,
+    QDRANT_PATH,
+)
 from embed import embed_query
-from evaluate import DEFAULT_DATASET, EvalExample, load_eval_dataset, normalize_for_match
-from index_preflight import COLLECTION_NAME
-from index_qdrant import QDRANT_PATH
-from main import EMBEDDING_MODEL, PROJECT_ROOT
+from evaluate import EvalExample, load_eval_dataset, normalize_for_match
+from vector_store import search_points
 
 
-TOP_K = 5
+TOP_K = DEFAULT_TOP_K
 PREVIEW_CHARS = 280
 
 
@@ -67,24 +72,14 @@ def inspect_results(example: EvalExample, points: list[object]) -> None:
     print(f"\nPage Hit@{TOP_K}: {hit}")
 
 
-def search_points(query_vector: list[float], top_k: int) -> list[object]:
-    """Search the local collection and return ranked points with payloads."""
-    client = QdrantClient(path=QDRANT_PATH)
-    try:
-        return client.query_points(
-            collection_name=COLLECTION_NAME,
-            query=query_vector,
-            with_payload=True,
-            limit=top_k,
-        ).points
-    finally:
-        client.close()
+def retrieve(question: str, top_k: int) -> list[object]:
+    """Embed one question and return its ranked local Qdrant results."""
+    query_vector = embed_query(question, EMBEDDING_MODEL)
+    return search_points(query_vector, top_k)
 
 
 def retrieve_example(example: EvalExample) -> None:
-    load_dotenv(PROJECT_ROOT / ".env")
-    query_vector = embed_query(example.question, EMBEDDING_MODEL)
-    points = search_points(query_vector, TOP_K)
+    points = retrieve(example.question, TOP_K)
     inspect_results(example, points)
 
 
@@ -114,6 +109,7 @@ def main() -> None:
         print("Dry run only. Re-run with --execute to perform retrieval.")
         return
 
+    load_dotenv(PROJECT_ROOT / ".env")
     retrieve_example(example)
 
 

@@ -9,12 +9,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from config import DEFAULT_DATASET, DEFAULT_PDF
 from extract import clean_text, extract_pages
 
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_DATASET = PROJECT_ROOT / "src" / "eval_dataset.json"
-DEFAULT_PDF = PROJECT_ROOT / "docs" / "Tesla_Inc.pdf"
 REQUIRED_FIELDS = {
     "id",
     "question",

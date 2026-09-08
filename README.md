@@ -17,8 +17,8 @@ Tesla PDF
   -> local Qdrant vector index
 ```
 
-Single-query retrieval inspection is implemented. Full retrieval evaluation and
-answer generation have not been added yet.
+Single-query retrieval, retrieval evaluation, and guarded grounded generation
+are implemented.
 
 ## Project structure
 
@@ -29,15 +29,16 @@ answer generation have not been added yet.
 ├── src/
 │   ├── extract.py
 │   ├── chunk.py
+│   ├── config.py
 │   ├── embed.py
 │   ├── evaluate.py
 │   ├── evaluate_retrieval.py
 │   ├── eval_dataset.json
 │   ├── generate.py
-│   ├── index_preflight.py
 │   ├── index_qdrant.py
+│   ├── pipeline.py
 │   ├── retrieve.py
-│   └── main.py
+│   └── vector_store.py
 ├── .env.example
 ├── .gitignore
 ├── requirements.txt
@@ -92,14 +93,6 @@ python src/extract.py --pages 3 --max-chars 0 --clean
 Cleaning currently normalizes safe whitespace artifacts. It deliberately does
 not guess paragraph boundaries, reorder content, or identify headings.
 
-## Build chunks and inspect embeddings
-
-Run the connected pipeline:
-
-```bash
-python src/main.py
-```
-
 The chunking baseline uses:
 
 ```text
@@ -134,17 +127,8 @@ why individual questions miss.
 
 ## Preview Qdrant indexing
 
-Inspect the complete indexing scope without making API calls:
-
-```bash
-python src/index_preflight.py
-```
-
-The preflight reports how many cleaned chunk texts and tokens would be sent to
-Voyage, checks chunk IDs and metadata, and displays the planned Qdrant vector
-and payload configuration. It does not create embeddings or a collection.
-
-Preview the guarded indexing command:
+Run the guarded indexing command without `--execute` to validate chunks and
+inspect the complete indexing scope without making API calls:
 
 ```bash
 python src/index_qdrant.py
@@ -156,7 +140,9 @@ After inspecting its scope, explicitly execute document embedding and indexing:
 python src/index_qdrant.py --execute
 ```
 
-Execution stores the `tesla_chunks` collection under `data/qdrant/`. It creates
+The dry run reports how many cleaned chunk texts and tokens would be sent to
+Voyage and displays the planned Qdrant configuration. Execution stores the
+`tesla_chunks` collection under `data/qdrant/`. It creates
 the collection only when absent, rejects incompatible existing configuration,
 upserts deterministic points in batches, and verifies the final point count and
 a sample payload. The local Qdrant data is ignored by Git.
@@ -234,5 +220,5 @@ Retrieval and generation are evaluated separately:
 - If the relevant chunk is not retrieved, debug retrieval.
 - If the relevant chunk is retrieved but the answer is poor, debug generation.
 
-The next stages will evaluate retrieval across all eight questions and then add
-grounded answer generation only after retrieval failures are understood.
+The next stage will evaluate grounded generation across all eight questions,
+keeping retrieval and generation failures separate.

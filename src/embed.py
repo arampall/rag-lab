@@ -1,13 +1,17 @@
 """Generate Voyage document embeddings for chunks."""
 
 from dataclasses import dataclass
-from chunk import Chunk
+
 import voyageai
+
+from chunk import Chunk
+
 
 @dataclass
 class Embedding:
-    vectors : list[list[float]]
+    vectors: list[list[float]]
     total_tokens: int
+
 
 def embed_query(query: str, model: str) -> list[float]:
     """Embed one retrieval query and return its single vector."""
@@ -35,16 +39,17 @@ def embed_queries(queries: list[str], model: str) -> Embedding:
         total_tokens=result.total_tokens,
     )
 
+
 def embed_chunks(chunks: list[Chunk], model: str) -> Embedding:
     if not chunks:
-        raise ValueError("Atleast one chunk required")
-   
+        raise ValueError("At least one chunk is required")
+
     client = voyageai.Client()
 
     result = client.embed(
-        [chunk.text for chunk in chunks], 
-        model=model, 
-        input_type="document"
+        [chunk.text for chunk in chunks],
+        model=model,
+        input_type="document",
     )
 
     vectors = result.embeddings
@@ -52,7 +57,4 @@ def embed_chunks(chunks: list[Chunk], model: str) -> Embedding:
     if len(vectors) != len(chunks):
         raise RuntimeError(f"Expected {len(chunks)} vectors, received {len(vectors)}")
 
-    return Embedding(
-        vectors=vectors,
-        total_tokens=result.total_tokens
-    )
+    return Embedding(vectors=vectors, total_tokens=result.total_tokens)

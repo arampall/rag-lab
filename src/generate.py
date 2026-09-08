@@ -1,15 +1,20 @@
 import argparse
-from dotenv import load_dotenv
 import os
 
-from evaluate import load_eval_dataset, DEFAULT_DATASET, EvalExample
-from embed import embed_query
-from retrieve import search_points, select_example
-from main import EMBEDDING_MODEL, PROJECT_ROOT
 from anthropic import Anthropic
+from dotenv import load_dotenv
 
-GENERATION_TOP_K = 5
-GENERATION_MODEL = 'claude-sonnet-5'
+from config import (
+    DEFAULT_DATASET,
+    DEFAULT_TOP_K,
+    GENERATION_MODEL,
+    PROJECT_ROOT,
+)
+from evaluate import EvalExample, load_eval_dataset
+from retrieve import retrieve, select_example
+
+
+GENERATION_TOP_K = DEFAULT_TOP_K
 MAX_OUTPUT_TOKENS = 250
 FALLBACK_MESSAGE = "Insufficient context to answer."
 
@@ -27,6 +32,7 @@ SYSTEM_PROMPT = f"""
     - Keep the answer concise
 """.strip()
 
+
 def require_api_keys() -> None:
     required_keys = ("VOYAGE_API_KEY", "ANTHROPIC_API_KEY")
     missing_keys = [
@@ -41,6 +47,7 @@ def require_api_keys() -> None:
             + ", ".join(missing_keys)
         )
 
+
 def print_execution_scope(example: EvalExample) -> None:
     print("Grounded-generation scope")
     print(f"Question selected: {example.question}")
@@ -54,18 +61,8 @@ def print_execution_scope(example: EvalExample) -> None:
     print(f"Maximum output: {MAX_OUTPUT_TOKENS} tokens")
 
 
-
 def retrieve_generation_context(example: EvalExample) -> list[object]:
-
-    query_vector = embed_query(
-        example.question, 
-        EMBEDDING_MODEL
-    )
-
-    points = search_points(
-        query_vector, 
-        GENERATION_TOP_K
-    )
+    points = retrieve(example.question, GENERATION_TOP_K)
 
     if len(points) != GENERATION_TOP_K:
         raise RuntimeError(
@@ -100,7 +97,6 @@ def format_sources(points: list[object]) -> str:
     formatted_sources: list[str] = []
 
     for rank, point in enumerate(points, start=1):
-
         payload = point.payload or {}
 
         chunk_id = payload.get("chunk_id")
@@ -129,8 +125,7 @@ def format_sources(points: list[object]) -> str:
                     f'chunk_id="{chunk_id}">'
                 ),
                 text,
-                "</source>"
-                
+                "</source>",
             ]
         )
 
@@ -140,7 +135,6 @@ def format_sources(points: list[object]) -> str:
 
 
 def build_user_prompt(example: EvalExample, points: list[object]) -> str:
-
     sources = format_sources(points)
 
     return "\n\n".join(
@@ -157,23 +151,21 @@ def call_generation_model(example: EvalExample, points: list[object]):
     return client.messages.create(
         model=GENERATION_MODEL,
         max_tokens=MAX_OUTPUT_TOKENS,
-        thinking={
-            "type": "disabled"
-        },
+        thinking={"type": "disabled"},
         system=SYSTEM_PROMPT,
         messages=[
             {
                 "role": "user",
-                "content": build_user_prompt(example, points)
+                "content": build_user_prompt(example, points),
             }
-        ]
+        ],
     )
 
 
 def extract_answer(message: object) -> str:
     answer = "".join(
-        block.text 
-        for block in message.content 
+        block.text
+        for block in message.content
         if block.type == "text"
     ).strip()
 
@@ -184,20 +176,14 @@ def extract_answer(message: object) -> str:
 
 
 def generate_answer(example: EvalExample) -> None:
-
-    load_dotenv(PROJECT_ROOT / ".env")
-    require_api_keys()
-
     points = retrieve_generation_context(example)
     print_context_scope(points)
 
     response = call_generation_model(example, points)
 
     if response.stop_reason == "max_tokens":
-        raise RuntimeError(
-            "Claude reached the output-token limit"
-        )
-    
+        raise RuntimeError("Claude reached the output-token limit")
+
     answer = extract_answer(response)
 
     print("\nAnswer")
@@ -208,8 +194,6 @@ def generate_answer(example: EvalExample) -> None:
         f"{response.usage.input_tokens} input tokens, "
         f"{response.usage.output_tokens} output tokens"
     )
-
-
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -222,7 +206,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--example-id",
         default="model3_paid_reservations",
-        help="example ID from eval_dataset.json."
+        help="Example ID from eval_dataset.json.",
     )
 
     parser.add_argument(
@@ -231,12 +215,10 @@ def parse_args() -> argparse.Namespace:
         help=(
             "Run one Voyage query, retrieve top-k chunks based on current setting "
             "and call Model API"
-        )
+        ),
     )
 
     return parser.parse_args()
-
-
 
 def main() -> None:
     args = parse_args()
@@ -246,7 +228,6 @@ def main() -> None:
 
     print_execution_scope(example)
 
-
     if not args.execute:
         print(
             "Dry run only. Rerun with --execute "
@@ -255,6 +236,8 @@ def main() -> None:
 
         return
 
+    load_dotenv(PROJECT_ROOT / ".env")
+    require_api_keys()
     generate_answer(example)
 
 

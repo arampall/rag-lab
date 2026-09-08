@@ -6,22 +6,27 @@ import argparse
 
 import voyageai
 from dotenv import load_dotenv
-from qdrant_client import QdrantClient
 
+from config import (
+    COLLECTION_NAME,
+    DEFAULT_DATASET,
+    DEFAULT_TOP_K,
+    EMBEDDING_MODEL,
+    PROJECT_ROOT,
+    QDRANT_PATH,
+    VECTOR_SIZE,
+)
 from embed import embed_queries
 from evaluate import (
-    DEFAULT_DATASET,
     EvalExample,
     load_eval_dataset,
     normalize_for_match,
     score_page_hit_rate,
 )
-from index_preflight import COLLECTION_NAME, VECTOR_SIZE
-from index_qdrant import QDRANT_PATH
-from main import EMBEDDING_MODEL, PROJECT_ROOT
+from vector_store import search_vectors
 
 
-TOP_K = 5
+TOP_K = DEFAULT_TOP_K
 PREVIEW_CHARS = 180
 
 
@@ -92,18 +97,11 @@ def run_evaluation(examples: list[EvalExample]) -> None:
     if any(len(vector) != VECTOR_SIZE for vector in embedding.vectors):
         raise RuntimeError(f"Voyage did not return {VECTOR_SIZE}-dimension vectors")
 
-    points_by_id: dict[str, list[object]] = {}
-    client = QdrantClient(path=QDRANT_PATH)
-    try:
-        for example, vector in zip(examples, embedding.vectors, strict=True):
-            points_by_id[example.id] = client.query_points(
-                collection_name=COLLECTION_NAME,
-                query=vector,
-                with_payload=True,
-                limit=TOP_K,
-            ).points
-    finally:
-        client.close()
+    ranked_points = search_vectors(embedding.vectors, TOP_K)
+    points_by_id = {
+        example.id: points
+        for example, points in zip(examples, ranked_points, strict=True)
+    }
 
     ranked_pages_by_id = {
         example_id: [
@@ -130,8 +128,12 @@ def run_evaluation(examples: list[EvalExample]) -> None:
     )
 
     print("\nRetrieval summary")
-    print(f"Page Hit@{TOP_K}: {page_hit_rate:.1%} ({sum(page_hit_by_id.values())}/{len(examples)})")
-    print(f"Phrase hit rate: {phrase_hits / len(examples):.1%} ({phrase_hits}/{len(examples)})")
+    page_hits = sum(page_hit_by_id.values())
+    print(f"Page Hit@{TOP_K}: {page_hit_rate:.1%} ({page_hits}/{len(examples)})")
+    print(
+        f"Phrase hit rate: {phrase_hits / len(examples):.1%} "
+        f"({phrase_hits}/{len(examples)})"
+    )
     print(f"Voyage billed query tokens: {embedding.total_tokens}")
 
 

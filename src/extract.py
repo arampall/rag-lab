@@ -9,8 +9,8 @@ from pathlib import Path
 
 from pypdf import PdfReader
 
+from config import DEFAULT_PDF
 
-DEFAULT_PDF = Path("docs/Tesla_Inc.pdf")
 DEFAULT_PAGES = (1, 3, 5, 8, 9, 40)
 
 
