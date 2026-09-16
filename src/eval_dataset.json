@@ -87,6 +87,197 @@
         ],
         "category": "business_strategy",
         "notes": "Licensing is presented as supporting Tesla's sustainability mission."
+    },
+    {
+        "id": "original_founders",
+        "question": "Who incorporated Tesla Motors in July 2003?",
+        "expected_answer": "Martin Eberhard and Marc Tarpenning.",
+        "expected_pages": [1, 2],
+        "expected_phrases": [
+            "The company was incorporated in July 2003 by Martin Eberhard and Marc Tarpenning"
+        ],
+        "category": "company_history",
+        "notes": "The founding fact appears in the introduction and the detailed history."
+    },
+    {
+        "id": "doe_government_loan",
+        "question": "How large was the government loan Tesla received from the Department of Energy in January 2010?",
+        "expected_answer": "$465 million.",
+        "expected_pages": [2],
+        "expected_phrases": [
+            "Tesla received a $465 million government loan from the Department of Energy"
+        ],
+        "category": "financing",
+        "notes": "A dated financing fact with a specific amount and government source."
+    },
+    {
+        "id": "gigafactory_shanghai_distinction",
+        "question": "What was distinctive about Gigafactory Shanghai among automobile factories in China?",
+        "expected_answer": "It was the first automobile factory in China fully owned by a foreign company rather than operated as a joint venture.",
+        "expected_pages": [4],
+        "expected_phrases": [
+            "the first automobile factory in China fully owned by a foreign company (not a joint venture)"
+        ],
+        "category": "manufacturing",
+        "notes": "Tests retrieval of a factory-specific distinction rather than just its location."
+    },
+    {
+        "id": "bitcoin_payments_ended",
+        "question": "Why did Tesla stop accepting bitcoin for vehicle purchases in 2021?",
+        "expected_answer": "Tesla was concerned that bitcoin production consumed fossil fuels and conflicted with its sustainable-energy mission.",
+        "expected_pages": [4],
+        "expected_phrases": [
+            "the company ended bitcoin payments over concerns that the production of bitcoin was contributing to the consumption of fossil fuels"
+        ],
+        "category": "business_decision",
+        "notes": "A causal question that requires distinguishing the reason from nearby bitcoin events."
+    },
+    {
+        "id": "tesla_semi_range",
+        "question": "What driving range does Tesla claim for the Semi?",
+        "expected_answer": "500 miles (800 km).",
+        "expected_pages": [6],
+        "expected_phrases": [
+            "a range of 500 miles (800 km)"
+        ],
+        "category": "vehicle_specification",
+        "notes": "A concise numeric specification for a commercial vehicle."
+    },
+    {
+        "id": "original_roadster_firsts",
+        "question": "What two electric-vehicle firsts are attributed to the original Tesla Roadster?",
+        "expected_answer": "It was the first highway-legal serial-production electric car to use lithium-ion battery cells and the first production all-electric car to travel more than 200 miles per charge.",
+        "expected_pages": [7],
+        "expected_phrases": [
+            "the first highway-legal serial production electric car to use lithium-ion battery cells",
+            "the first production all-electric car to travel more than 200 miles"
+        ],
+        "category": "vehicle_history",
+        "notes": "Requires retrieving both claims from one answer-bearing passage."
+    },
+    {
+        "id": "vehicle_service_sequence",
+        "question": "How does Tesla attempt to service a vehicle before directing it to a service center?",
+        "expected_answer": "Tesla first tries remote diagnosis and repair; if that fails, it dispatches a mobile technician or directs the customer to a company-owned service center.",
+        "expected_pages": [8],
+        "expected_phrases": [
+            "service its vehicles first through remote diagnosis and repair"
+        ],
+        "category": "services",
+        "notes": "Tests retrieval of an ordered service process rather than a standalone entity."
+    },
+    {
+        "id": "supercharger_network_launch",
+        "question": "When and with how many stations was Tesla's Supercharger network introduced?",
+        "expected_answer": "It was introduced on September 24, 2012, with six stations in California.",
+        "expected_pages": [8],
+        "expected_phrases": [
+            "introduced on September 24, 2012, as the Tesla Model S entered production, with six stations in California"
+        ],
+        "category": "charging",
+        "notes": "Combines a launch date and initial network size from one passage."
+    },
+    {
+        "id": "energy_storage_products",
+        "question": "Which Tesla Energy product is intended for home storage, and which is intended for large-scale storage?",
+        "expected_answer": "Powerwall is the home energy storage product, while Megapack is the large-scale energy storage product.",
+        "expected_pages": [9],
+        "expected_phrases": [
+            "the Powerwall (a home energy storage device) and the Megapack (a large-scale energy storage system)"
+        ],
+        "category": "energy_products",
+        "notes": "A comparison question requiring the correct role for two related products."
+    },
+    {
+        "id": "battery_suppliers",
+        "question": "Which three companies supply batteries to Tesla?",
+        "expected_answer": "CATL, LG Energy Solution, and Panasonic.",
+        "expected_pages": [10],
+        "expected_phrases": [
+            "CATL, LG Energy Solution, and Panasonic"
+        ],
+        "category": "supply_chain",
+        "notes": "Tests recall of a complete three-entity list from the battery section."
+    },
+    {
+        "id": "prismatic_cell_tradeoff",
+        "question": "What chemistry do Tesla's prismatic cells use, and what cost-related advantage does it provide?",
+        "expected_answer": "They use lithium iron phosphate (LFP), which contains no nickel or cobalt and is therefore less expensive to produce.",
+        "expected_pages": [11],
+        "expected_phrases": [
+            "lithium iron phosphate battery (LFP or LiFePO4)",
+            "does not contain any nickel or cobalt, which makes it less expensive to produce"
+        ],
+        "category": "battery_technology",
+        "notes": "Tests a technical attribute and its stated economic consequence."
+    },
+    {
+        "id": "over_the_air_updates",
+        "question": "What does Tesla use over-the-air vehicle updates to do?",
+        "expected_answer": "Tesla uses them to add features or fix problems in its vehicles.",
+        "expected_pages": [11],
+        "expected_phrases": [
+            "uses over-the-air updates to deliver updates to vehicles, adding features or fixing problems"
+        ],
+        "category": "software",
+        "notes": "A software-capability question distinct from driver assistance."
+    },
+    {
+        "id": "nacs_opened_to_manufacturers",
+        "question": "When did Tesla open the North American Charging Standard for use by other manufacturers?",
+        "expected_answer": "In 2022.",
+        "expected_pages": [12],
+        "expected_phrases": [
+            "was opened for use by other manufacturers in 2022"
+        ],
+        "category": "charging_standard",
+        "notes": "Tests a dated ecosystem decision about NACS rather than Supercharger operations."
+    },
+    {
+        "id": "giga_press_benefits",
+        "question": "What production benefits does Tesla claim from using Giga Presses?",
+        "expected_answer": "Their large single-piece underbodies reduce production time, labor costs, factory footprint, and the number of welding robots.",
+        "expected_pages": [13],
+        "expected_phrases": [
+            "reductions in production time, labor costs, factory footprint, and the number of welding robots"
+        ],
+        "category": "manufacturing",
+        "notes": "A multi-part process-improvement question grounded in one passage."
+    },
+    {
+        "id": "cybertruck_factory",
+        "question": "Which Tesla factory is the only one that produces the Cybertruck?",
+        "expected_answer": "Gigafactory Texas.",
+        "expected_pages": [14],
+        "expected_phrases": [
+            "Giga Texas is the only factory that produces the Tesla Cybertruck"
+        ],
+        "category": "manufacturing",
+        "notes": "Tests disambiguation among several Gigafactories and their products."
+    },
+    {
+        "id": "china_revenue_share_2024",
+        "question": "What share of Tesla's sales revenue came from China in 2024?",
+        "expected_answer": "21%.",
+        "expected_pages": [15],
+        "expected_phrases": [
+            "In 2024, China accounted for 21% of Tesla sales revenue"
+        ],
+        "category": "market",
+        "notes": "A market-share-style numeric fact that must not be confused with the nearby share of cars sold in China."
+    },
+    {
+        "id": "toyota_tesla_2010_deal",
+        "question": "What were the three parts of the deal Tesla and Toyota announced in May 2010?",
+        "expected_answer": "Tesla bought the former NUMMI factory from Toyota for $42 million, Toyota bought $50 million in Tesla stock, and the companies agreed to collaborate on an electric vehicle.",
+        "expected_pages": [16],
+        "expected_phrases": [
+            "Tesla purchased the former NUMMI factory from Toyota for $42 million",
+            "Toyota purchased $50 million in Tesla stock",
+            "the two companies collaborated on an electric vehicle"
+        ],
+        "category": "partnership",
+        "notes": "A multi-fact partnership question designed to require the complete deal passage."
     }
 ]
     
