@@ -62,25 +62,25 @@ def require_api_keys() -> None:
         )
 
 
-def print_execution_scope(example: EvalExample) -> None:
+def print_execution_scope(example: EvalExample, top_k: int) -> None:
     print("Grounded-generation scope")
     print(f"Question selected: {example.question}")
     print("Ready to embed query and retrieve relevant context")
-    print(f"Vector retrieval: top {GENERATION_TOP_K} chunks")
+    print(f"Vector retrieval: top {top_k} chunks")
     print(
-        f"Claude input: the same question plus {GENERATION_TOP_K} complete "
+        f"Claude input: the same question plus {top_k} complete "
         "retrieved chunks and their metadata"
     )
     print(f"Claude model: {GENERATION_MODEL}")
     print(f"Maximum output: {MAX_OUTPUT_TOKENS} tokens")
 
 
-def retrieve_generation_context(example: EvalExample) -> list[object]:
-    points = retrieve(example.question, GENERATION_TOP_K)
+def retrieve_generation_context(example: EvalExample, top_k: int = GENERATION_TOP_K) -> list[object]:
+    points = retrieve(example.question, top_k)
 
-    if len(points) != GENERATION_TOP_K:
+    if len(points) != top_k:
         raise RuntimeError(
-            f"Expected {GENERATION_TOP_K} chunks, "
+            f"Expected {top_k} chunks, "
             f"received {len(points)}"
         )
 
@@ -203,8 +203,8 @@ def print_generation_result(result: GenerationResult) -> None:
 
 
 
-def generate_result(example: EvalExample) -> GenerationResult:
-    points = retrieve_generation_context(example)
+def generate_result(example: EvalExample, top_k: int = GENERATION_TOP_K) -> GenerationResult:
+    points = retrieve_generation_context(example, top_k)
     response = call_generation_model(example, points)
 
     if response.stop_reason == "max_tokens":
@@ -233,6 +233,16 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
+        "--top-k",
+        type=int,
+        default=GENERATION_TOP_K,
+        help=(
+            "Number of ranked chunks to provide to Claude. "
+            f"Defaults to the frozen baseline of {GENERATION_TOP_K}."
+        ),
+    )
+
+    parser.add_argument(
         "--execute",
         action="store_true",
         help=(
@@ -241,7 +251,12 @@ def parse_args() -> argparse.Namespace:
         ),
     )
 
-    return parser.parse_args()
+    args = parser.parse_args()
+
+    if args.top_k < 1:
+        parser.error("--top-k must be at least 1")
+
+    return args
 
 def main() -> None:
     args = parse_args()
@@ -249,7 +264,7 @@ def main() -> None:
     examples = load_eval_dataset(DEFAULT_DATASET)
     example = select_example(examples, args.example_id)
 
-    print_execution_scope(example)
+    print_execution_scope(example, args.top_k)
 
     if not args.execute:
         print(
@@ -261,7 +276,7 @@ def main() -> None:
 
     load_dotenv(PROJECT_ROOT / ".env")
     require_api_keys()
-    result = generate_result(example)
+    result = generate_result(example, args.top_k)
     print_generation_result(result)
 
 
