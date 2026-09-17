@@ -167,21 +167,25 @@ short text preview so retrieval failures remain inspectable.
 
 ## Evaluate all retrieval questions
 
-Preview the eight-query evaluation scope without making an API call:
+Preview the 25-query evaluation scope without making an API call:
 
 ```bash
 python src/evaluate_retrieval.py
 ```
 
-Embed all eight questions in one Voyage query batch and calculate page `Hit@5`
-plus phrase hit rate:
+Embed all 25 questions in one Voyage query batch, retrieve six ranked chunks
+per question, and compare page and phrase hit rates at both top five and top
+six:
 
 ```bash
 python src/evaluate_retrieval.py --execute
 ```
 
-Every ranked result retains its score, page, chunk ID, and text preview. This
-keeps aggregate metrics from hiding which questions or chunks failed.
+The evaluator preserves vector-only top five as the configured baseline. It
+retrieves six results once, scores the same ranked results at both cutoffs, and
+prints all six ranks for each top-five miss. Every displayed result retains its
+score, page, chunk ID, and text preview so aggregate metrics do not hide why a
+question failed.
 
 The first eight-question baseline produced:
 
@@ -193,6 +197,20 @@ Phrase hits:   87.5% (7/8)
 The Panasonic partnership question missed; related battery passages displaced
 the expected page 15 passage from the top five. Diagnose that baseline failure
 before introducing more advanced retrieval techniques.
+
+After expanding the dataset to 25 manually source-verified questions, the
+top-five and top-six comparison produced:
+
+```text
+Page Hit@5:    96.0% (24/25)
+Phrase Hit@5:  96.0% (24/25)
+Page Hit@6:   100.0% (25/25)
+Phrase Hit@6: 100.0% (25/25)
+```
+
+The Panasonic partnership question remained the only top-five miss and became
+the only new hit at rank six. This supports a narrow ranking-ambiguity diagnosis
+without yet changing the frozen top-five generation baseline.
 
 ## Generate one grounded answer
 
@@ -268,9 +286,13 @@ evaluation, and guarded generation-evaluation flows are implemented. The local
 `tesla_chunks` collection already contains 225 points; do not re-index it for
 the next milestone.
 
-The frozen top-five generation baseline passed all eight automated
+The frozen top-five generation baseline passed all eight original automated
 grounding-behavior checks and all initial manual correctness checks. Prompt
 experiments reduced the three verbose answers by 82% in total and exposed that
-valid page citations do not prove claim-level entailment. The next checkpoint is
-to design the smallest retrieval experiment for the known Panasonic rank-six
-miss while preserving vector-only top five as the recorded baseline.
+valid page citations do not prove claim-level entailment.
+
+The retrieval dataset now contains 25 manually source-verified questions. On
+that expanded set, top five achieved 96% page and phrase hit rates, while top
+six achieved 100%; the Panasonic partnership question was the only result that
+changed. Top five remains the generation baseline until the additional context
+cost and end-to-end behavior of top six are evaluated explicitly.

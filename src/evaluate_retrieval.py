@@ -26,7 +26,9 @@ from evaluate import (
 from vector_store import search_vectors
 
 
-TOP_K = DEFAULT_TOP_K
+BASELINE_TOP_K = DEFAULT_TOP_K
+EXPERIMENT_TOP_K = BASELINE_TOP_K + 1
+EVALUATION_CUTOFFS = (BASELINE_TOP_K, EXPERIMENT_TOP_K)
 PREVIEW_CHARS = 180
 
 
@@ -41,7 +43,8 @@ def print_scope(examples: list[EvalExample]) -> None:
     print(f"Query tokens before Voyage instruction: {count_query_tokens(examples)}")
     print(f"Embedding model/input type: {EMBEDDING_MODEL} / query")
     print(f"Qdrant collection: {COLLECTION_NAME} at {QDRANT_PATH}")
-    print(f"Results per query: {TOP_K}")
+    print(f"Results retrieved per query: {EXPERIMENT_TOP_K}")
+    print(f"Evaluation cutoffs: {list(EVALUATION_CUTOFFS)}")
     for example in examples:
         print(f"- {example.id}: {example.question}")
 
@@ -58,15 +61,31 @@ def phrase_hit(example: EvalExample, points: list[object]) -> bool:
     )
 
 
+def score_phrase_hits(
+    examples: list[EvalExample],
+    points_by_id: dict[str, list[object]],
+    top_k: int,
+) -> tuple[float, dict[str, bool]]:
+    hits_by_id = {
+        example.id: phrase_hit(
+            example,
+            points_by_id[example.id][:top_k],
+        )
+        for example in examples
+    }
+
+    hit_count = sum(hits_by_id.values())
+    return hit_count / len(examples), hits_by_id
+
+
 def print_example_results(
     example: EvalExample,
     points: list[object],
-    page_hit: bool,
-) -> bool:
+) -> None:
     expected_pages = set(example.expected_pages)
-    has_phrase_hit = phrase_hit(example, points)
+
     print(f"\n{example.id}")
-    print(f"Page Hit@{TOP_K}: {page_hit} | Phrase hit: {has_phrase_hit}")
+    print(f"Inspecting top {len(points)} results")
 
     for rank, point in enumerate(points, start=1):
         payload = point.payload or {}
@@ -85,8 +104,6 @@ def print_example_results(
         )
         print(f"     {preview}")
 
-    return has_phrase_hit
-
 
 def run_evaluation(examples: list[EvalExample]) -> None:
     load_dotenv(PROJECT_ROOT / ".env")
@@ -97,7 +114,7 @@ def run_evaluation(examples: list[EvalExample]) -> None:
     if any(len(vector) != VECTOR_SIZE for vector in embedding.vectors):
         raise RuntimeError(f"Voyage did not return {VECTOR_SIZE}-dimension vectors")
 
-    ranked_points = search_vectors(embedding.vectors, TOP_K)
+    ranked_points = search_vectors(embedding.vectors, EXPERIMENT_TOP_K)
     points_by_id = {
         example.id: points
         for example, points in zip(examples, ranked_points, strict=True)
@@ -111,30 +128,84 @@ def run_evaluation(examples: list[EvalExample]) -> None:
         ]
         for example_id, points in points_by_id.items()
     }
-    page_hit_rate, page_results = score_page_hit_rate(
+    print("\nRetrieval comparison")
+
+    for top_k in EVALUATION_CUTOFFS:
+
+        page_hit_rate, page_results = score_page_hit_rate(
+            examples,
+            ranked_pages_by_id,
+            top_k=top_k,
+        )
+
+        page_hit_by_id = {result.example_id: result.hit for result in page_results}
+        page_hits = sum(page_hit_by_id.values())
+
+        phrase_hit_rate, phrase_hits_by_id = score_phrase_hits(
+            examples,
+            points_by_id,
+            top_k,
+        )
+
+        phrase_hits = sum(phrase_hits_by_id.values())
+
+        print(f"\nTop {top_k}")
+        print(
+            f"Page Hit@{top_k}: {page_hit_rate:.1%} "
+            f"({page_hits}/{len(examples)})"
+        )
+
+        print(
+            f"Phrase Hit@{top_k}: {phrase_hit_rate:.1%} "
+            f"({phrase_hits}/{len(examples)})"
+        )
+
+    print(f"Voyage billed query tokens: {embedding.total_tokens}")
+
+    _, baseline_page_results = score_page_hit_rate(
         examples,
         ranked_pages_by_id,
-        top_k=TOP_K,
+        top_k=BASELINE_TOP_K,
     )
-    page_hit_by_id = {result.example_id: result.hit for result in page_results}
 
-    phrase_hits = sum(
+    _, experiment_page_results = score_page_hit_rate(
+        examples,
+        ranked_pages_by_id,
+        top_k=EXPERIMENT_TOP_K,
+    )
+
+    baseline_hits = {
+        result.example_id: result.hit
+        for result in baseline_page_results
+    }
+
+    baseline_misses = [
+        example
+        for example in examples
+        if not baseline_hits[example.id]
+    ]
+
+    print("\nBaseline misses, including rank 6 evidence")
+
+    for example in baseline_misses:
         print_example_results(
             example,
             points_by_id[example.id],
-            page_hit_by_id[example.id],
         )
-        for example in examples
-    )
 
-    print("\nRetrieval summary")
-    page_hits = sum(page_hit_by_id.values())
-    print(f"Page Hit@{TOP_K}: {page_hit_rate:.1%} ({page_hits}/{len(examples)})")
-    print(
-        f"Phrase hit rate: {phrase_hits / len(examples):.1%} "
-        f"({phrase_hits}/{len(examples)})"
-    )
-    print(f"Voyage billed query tokens: {embedding.total_tokens}")
+    experiment_hits = {
+        result.example_id: result.hit
+        for result in experiment_page_results
+    }
+
+    new_hits = [
+        example.id
+        for example in examples
+        if not baseline_hits[example.id]
+        and experiment_hits[example.id]
+    ]
+
+    print(f"New page hits at rank 6: {new_hits or 'none'}")
 
 
 def parse_args() -> argparse.Namespace:
